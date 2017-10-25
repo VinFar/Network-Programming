@@ -63,7 +63,7 @@ int main(int argc, char **argv)
 
 	len =Recv(fd,buf,sizeof(buf),0);
 
-	printf("size: %d",len);
+	
 
 	Write(STDOUT_FILENO,buf,len);
 

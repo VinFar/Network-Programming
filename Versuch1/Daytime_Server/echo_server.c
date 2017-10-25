@@ -95,6 +95,7 @@ int main(void)
 		_exit(-1);
 	}
 	
+
 	while (Select(connfd + 1, NULL, &fdset_recv, NULL, &time_val))
 	{
 		
@@ -109,7 +110,9 @@ int main(void)
 
 		c_time_string = ctime(&current_time);
 
-		Send(connfd, c_time_string, sizeof(c_time_string), 0);
+		snprintf(buf,sizeof(buf),"%.24s\r\n",ctime(&current_time));
+
+		Send(connfd, buf, sizeof(buf), 0);
 		printf("send date:%s", c_time_string);
 
 		Listen(fd, 3); //Accept incoming connections
