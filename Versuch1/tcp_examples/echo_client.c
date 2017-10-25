@@ -31,18 +31,18 @@
 
 int main(int argc, char **argv)
 {
-
-	if (argc < 3)
-	{
-		puts("too few arguments!");
-		_exit(-1);
-	}
 	int fd;
 	struct sockaddr_in server_addr;
 	socklen_t addr_len;
 	ssize_t len;
 	char buf[BUFFER_SIZE];
 	char chr;
+
+	if (argc < 3)
+	{
+		puts("too few arguments!");
+		_exit(-1);
+	}
 
 	fd = Socket(AF_INET, SOCK_STREAM, 0); //create socket
 
@@ -61,18 +61,17 @@ int main(int argc, char **argv)
 
 	memset(buf, 0, sizeof(buf));
 
-	while (read(STDIN_FILENO, &chr, 1)>0)	/* Read 1 byte from STDIN*/
+	while ((fgets(buf,BUFFER_SIZE,stdin)))	/* Read 1 byte from STDIN*/
 	{
-		buf[0] = chr;
-		buf[1] = 0;	/*Terminate string*/
+		if(!strncmp(buf,(char*)"exit\n",sizeof("exit\n"))){
+			puts("closing connection...");
+			break;
+		}
 
-		Send(fd, (const void *)buf, 2, 0);
+		Send(fd, (const void *)buf, BUFFER_SIZE, 0);
 
-		len = Recv(fd, (void *)buf, sizeof(buf), 0);
-
-		Write(STDOUT_FILENO, buf, (size_t)len);
 	}
 
-	Close(fd);
+	shutdown(fd,SHUT_RDWR);
 	return 0;
 }

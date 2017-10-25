@@ -37,12 +37,15 @@
 
 int main(void)
 {
-	int fd;
+	int fd, sel_res, tr = 1;
+
+	fd_set fdset_recv, fdset_err;
 	struct sockaddr_in server_addr, client_addr;
 	socklen_t addr_len;
 	ssize_t len;
 	int connfd;
 	char buf[9216];
+	struct timeval time;
 
 	fd = Socket(AF_INET, SOCK_STREAM, 0);
 
@@ -58,6 +61,12 @@ int main(void)
 	client_addr.sin_addr.s_addr = htonl(INADDR_ANY);
 	client_addr.sin_port = htons(2007);
 
+	if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &tr, sizeof(int)) == -1)
+	{
+		perror("setsockopt");
+		_exit(1);
+	}
+
 	Bind(fd, (const struct sockaddr *)&server_addr, sizeof(server_addr)); //Bind port to socket
 
 	addr_len = (socklen_t)sizeof(client_addr);
@@ -68,18 +77,57 @@ int main(void)
 
 	connfd = Accept(fd, (struct sockaddr *)&client_addr, addr_len); //wait for client connection to arrive. fill in client_addr struct. fd is the listening socket.
 																	//connfd is the connected socket
-	/*len = Write(STDOUT_FILENO,&connfd,(sizeof(connfd)));*/
+	time.tv_sec = 10;
+	time.tv_usec = 1;
 
-	do
+	FD_ZERO(&fdset_recv); /*zero fd_set*/
+	FD_SET(connfd, &fdset_recv);
+	if (!FD_ISSET(connfd, &fdset_recv))
 	{
-		
-		len = Recv(connfd, buf, sizeof(buf), 0);
+		perror("FD_ISSET recv error");
+		_exit(-1);
+	}
 
-		Write(STDOUT_FILENO, buf, len);
+	FD_ZERO(&fdset_err);
+	FD_SET(connfd, &fdset_err);
+	if (!FD_ISSET(connfd, &fdset_err))
+	{
+		perror("FD_ISSET err error");
+		_exit(1);
+	}
 
-		Send(connfd, buf, len, 0);
+	puts("1");
+	while ((sel_res = Select(connfd + 1, &fdset_recv, NULL, NULL, &time)))
+	{
+		if (sel_res == -1)
+		{
+			perror("select error");
+			_exit(-1);
+		}
 		
-	} while (1);
+		if(FD_ISSET(connfd, &fdset_recv) != 0)
+		{
+			len = Recv(connfd, buf, sizeof(buf), 0);
+			
+			if (len <= 0)
+			{
+				puts("Closing connection...");
+				shutdown(fd,SHUT_RDWR);
+				return 0;
+			}
+
+			Write(STDOUT_FILENO, buf, len);
+
+			FD_SET(connfd, &fdset_recv);
+			if (!FD_ISSET(connfd, &fdset_recv))
+			{
+				perror("FD_ISSET error");
+				_exit(-1);
+			}
+		}
+	}
+
+	puts("timeout after 10s!\n");
 
 	Close(fd);
 

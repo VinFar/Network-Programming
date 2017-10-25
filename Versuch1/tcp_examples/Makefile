@@ -88,7 +88,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = x86_64-pc-linux-gnu
 host_triplet = x86_64-pc-linux-gnu
-bin_PROGRAMS = client$(EXEEXT) echo_server$(EXEEXT)
+bin_PROGRAMS = echo_client$(EXEEXT) echo_server$(EXEEXT)
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
@@ -103,9 +103,9 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_client_OBJECTS = client.$(OBJEXT) Socket.$(OBJEXT)
-client_OBJECTS = $(am_client_OBJECTS)
-client_LDADD = $(LDADD)
+am_echo_client_OBJECTS = echo_client.$(OBJEXT) Socket.$(OBJEXT)
+echo_client_OBJECTS = $(am_echo_client_OBJECTS)
+echo_client_LDADD = $(LDADD)
 am_echo_server_OBJECTS = echo_server.$(OBJEXT) Socket.$(OBJEXT)
 echo_server_OBJECTS = $(am_echo_server_OBJECTS)
 echo_server_LDADD = $(LDADD)
@@ -137,8 +137,8 @@ AM_V_CCLD = $(am__v_CCLD_$(V))
 am__v_CCLD_ = $(am__v_CCLD_$(AM_DEFAULT_VERBOSITY))
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(client_SOURCES) $(echo_server_SOURCES)
-DIST_SOURCES = $(client_SOURCES) $(echo_server_SOURCES)
+SOURCES = $(echo_client_SOURCES) $(echo_server_SOURCES)
+DIST_SOURCES = $(echo_client_SOURCES) $(echo_server_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -280,7 +280,7 @@ target_alias =
 top_build_prefix = 
 top_builddir = .
 top_srcdir = .
-client_SOURCES = client.c	Socket.h Socket.c
+echo_client_SOURCES = echo_client.c Socket.h Socket.c
 echo_server_SOURCES = echo_server.c Socket.h Socket.c
 all: all-am
 
@@ -362,9 +362,9 @@ uninstall-binPROGRAMS:
 clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
 
-client$(EXEEXT): $(client_OBJECTS) $(client_DEPENDENCIES) $(EXTRA_client_DEPENDENCIES) 
-	@rm -f client$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(client_OBJECTS) $(client_LDADD) $(LIBS)
+echo_client$(EXEEXT): $(echo_client_OBJECTS) $(echo_client_DEPENDENCIES) $(EXTRA_echo_client_DEPENDENCIES) 
+	@rm -f echo_client$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(echo_client_OBJECTS) $(echo_client_LDADD) $(LIBS)
 
 echo_server$(EXEEXT): $(echo_server_OBJECTS) $(echo_server_DEPENDENCIES) $(EXTRA_echo_server_DEPENDENCIES) 
 	@rm -f echo_server$(EXEEXT)
@@ -377,7 +377,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 include ./$(DEPDIR)/Socket.Po
-include ./$(DEPDIR)/client.Po
+include ./$(DEPDIR)/echo_client.Po
 include ./$(DEPDIR)/echo_server.Po
 
 .c.o:

@@ -7,7 +7,6 @@
 
 #include "Socket.h"
 
-
 int Socket(int fd, int type, int protocol)
 {
 
@@ -33,7 +32,7 @@ int Bind(int fd, const struct sockaddr *addr, socklen_t addrlen)
 	return 0;
 }
 
-ssize_t Sendto(int sockfd, const void *buf, size_t len, int flags,const struct sockaddr *dest_addr, socklen_t addrlen)
+ssize_t Sendto(int sockfd, const void *buf, size_t len, int flags, const struct sockaddr *dest_addr, socklen_t addrlen)
 {
 
 	ssize_t send_len;
@@ -102,48 +101,55 @@ int Close(int fd)
 	return 0;
 }
 
-ssize_t Recv(int sockfd,void *buf,size_t len,int flags){
-	
+ssize_t Recv(int sockfd, void *buf, size_t len, int flags)
+{
+
 	ssize_t recv_byte;
-	
-	if((recv_byte = recv(sockfd,buf,len,flags))<0){
-		
+
+	if ((recv_byte = recv(sockfd, buf, len, flags)) < 0)
+	{
+
 		printf("recv error:");
 		_exit(-1);
 	}
-	
+
 	return recv_byte;
 }
 
-ssize_t Send(int sockfd, const void *buf,size_t len,int flags){
-	
+ssize_t Send(int sockfd, const void *buf, size_t len, int flags)
+{
+
 	ssize_t send_byte;
-	
-	if((send_byte = send(sockfd,buf,len,flags))<0){
-		
+
+	if ((send_byte = send(sockfd, buf, len, flags)) < 0)
+	{
+
 		printf("send error:");
 		_exit(-1);
-		
 	}
-	
+
 	return send_byte;
 }
 
-int Accept(int fd, struct sockaddr* addr, socklen_t len){
-	
-	int fd_acc;	
+int Accept(int fd, struct sockaddr *addr, socklen_t len)
+{
 
-	if((fd_acc = accept(fd,addr,&len))<0){
-	
+	int fd_acc;
+
+	if ((fd_acc = accept(fd, addr, &len)) < 0)
+	{
+
 		perror("accept error:");
 		_exit(-1);
-	}	
+	}
 	return fd_acc;
-}	
+}
 
-int Listen(int sockfd,int backlog){
+int Listen(int sockfd, int backlog)
+{
 
-	if(listen(sockfd,backlog)){
+	if (listen(sockfd, backlog))
+	{
 
 		perror("listen error:");
 		_exit(-1);
@@ -152,11 +158,13 @@ int Listen(int sockfd,int backlog){
 	return 0;
 }
 
-ssize_t Write(int fd,const void* buf,size_t nbytes){
+ssize_t Write(int fd, const void *buf, size_t nbytes)
+{
 
 	ssize_t wrote;
 
-	if((wrote = write(fd,buf,nbytes))<0){
+	if ((wrote = write(fd, buf, nbytes)) < 0)
+	{
 
 		perror("write error:");
 		_exit(-1);
@@ -164,23 +172,40 @@ ssize_t Write(int fd,const void* buf,size_t nbytes){
 	return wrote;
 }
 
-
 /*------------------------------------------------*/
-int getch(void) {
-      int c=0;
+int getch(void)
+{
+	int c = 0;
 
-      struct termios org_opts, new_opts;
-      int res=0;
-          //-----  store old settings -----------
-      res=tcgetattr(STDIN_FILENO, &org_opts);
-      assert(res==0);
-          //---- set new terminal parms --------
-      memcpy(&new_opts, &org_opts, sizeof(new_opts));
-      new_opts.c_lflag &= ~(ICANON | ECHO | ECHOE | ECHOK | ECHONL | ICRNL);
-      tcsetattr(STDIN_FILENO, TCSANOW, &new_opts);
-      c=getchar();
-          //------  restore old settings ---------
-      res=tcsetattr(STDIN_FILENO, TCSANOW, &org_opts);
-      assert(res==0);
-      return(c);
+	struct termios org_opts, new_opts;
+	int res = 0;
+	//-----  store old settings -----------
+	res = tcgetattr(STDIN_FILENO, &org_opts);
+	assert(res == 0);
+	//---- set new terminal parms --------
+	memcpy(&new_opts, &org_opts, sizeof(new_opts));
+	new_opts.c_lflag &= ~(ICANON | ECHO | ECHOE | ECHOK | ECHONL | ICRNL);
+	tcsetattr(STDIN_FILENO, TCSANOW, &new_opts);
+	c = getchar();
+	//------  restore old settings ---------
+	res = tcsetattr(STDIN_FILENO, TCSANOW, &org_opts);
+	assert(res == 0);
+	return (c);
+}
+
+int Select(int fd, fd_set *readset, fd_set *writeset, fd_set *exceptset, struct timeval *timeout)
+{
+
+	int sel;
+
+	sel = select(fd, readset, writeset, exceptset, timeout);
+	
+	if (sel < 0)
+	{
+
+		perror("select error");
+		_exit(-1);
+	}
+
+	return sel;
 }

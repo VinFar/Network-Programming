@@ -12,6 +12,8 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <sys/time.h>
+#include <sys/select.h>
 #include <unistd.h>
 #include <string.h>
 #include <stdio.h>
@@ -34,5 +36,6 @@ int Accept(int fd, struct sockaddr* addr, socklen_t len);
 ssize_t Write(int fd,const void* buf,size_t nbytes);
 int Listen(int sockfd,int backlog);
 int getch(void);
+int Select(int fd, fd_set *readset, fd_set *writeset, fd_set *exceptset, struct timeval *timeout);
 
 #endif /* SOCKET_H_ */
