@@ -32,11 +32,12 @@
 int main(int argc, char **argv)
 {
 	int fd;
+	fd_set fdset;
 	struct sockaddr_in server_addr;
 	socklen_t addr_len;
 	ssize_t len;
 	char buf[BUFFER_SIZE];
-	char chr;
+	struct timeval time_val;
 
 	if (argc < 3)
 	{
@@ -61,23 +62,38 @@ int main(int argc, char **argv)
 
 	memset(buf, 0, sizeof(buf));
 
-	len =Recv(fd,buf,sizeof(buf),0);
-
-	
-
-	Write(STDOUT_FILENO,buf,len);
-
-	while ((fgets(buf,BUFFER_SIZE,stdin)))	/* Read 1 byte from STDIN*/
+	FD_ZERO(&fdset); /*zero fd_set*/
+	FD_SET(fd, &fdset);
+	if (!FD_ISSET(fd, &fdset))
 	{
-		if(!strncmp(buf,(char*)"exit\n",sizeof("exit\n"))){
-			puts("closing connection...");
-			break;
-		}
-
-		Send(fd, (const void *)buf, BUFFER_SIZE, 0);
-
+		perror("FD_ISSET recv error");
+		_exit(-1);
 	}
 
-	shutdown(fd,SHUT_RDWR);
+	time_val.tv_sec = 2;
+	time_val.tv_usec = 1;
+
+	if (Select(fd+1, &fdset, NULL, NULL, &time_val))
+	{
+
+		len = Recv(fd, buf, sizeof(buf), 0);
+
+		Write(STDOUT_FILENO, buf, len);
+
+		while ((fgets(buf, BUFFER_SIZE, stdin))) /* Read 1 byte from STDIN*/
+		{
+			if (!strncmp(buf, (char *)"exit\n", sizeof("exit\n")))
+			{
+
+				break;
+			}
+
+			Send(fd, (const void *)buf, BUFFER_SIZE, 0);
+		}
+	}else{
+		puts("timeout");
+	}
+	puts("closing connection...");
+	shutdown(fd, SHUT_RDWR);
 	return 0;
 }

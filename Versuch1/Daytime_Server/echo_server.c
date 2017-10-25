@@ -42,9 +42,9 @@
 
 int main(void)
 {
-	int fd, sel_res, tr = 1, fd_stdin;
+	int fd, sel_res, tr = 1;
 
-	fd_set fdset_recv, fdset_err;
+	fd_set fdset_recv;
 	struct sockaddr_in server_addr, client_addr;
 	socklen_t addr_len;
 	ssize_t len;
@@ -129,7 +129,7 @@ int main(void)
 
 	puts("1");
 
-	while ((sel_res = Select(connfd + 1, &fdset_recv, NULL, NULL, &time)))
+	while ((sel_res = Select(connfd + 1, &fdset_recv, NULL, NULL, &time_val)))
 	{
 		if (sel_res == -1)
 		{
