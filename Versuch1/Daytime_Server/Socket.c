@@ -209,3 +209,39 @@ int Select(int fd, fd_set *readset, fd_set *writeset, fd_set *exceptset, struct 
 
 	return sel;
 }
+
+void *Senddate(thr_struct *attr){
+
+	puts("thread 1");
+	
+
+	time_t current_time;
+	char *c_time_string;
+	char buf[BUFFER_SIZE];
+	ssize_t len;
+
+	if(FD_ISSET(attr->connfd,attr->fdset_recv)){
+		puts("recv");
+	}
+
+	current_time = time(NULL);
+
+	c_time_string = ctime(&current_time);
+
+	snprintf(buf, sizeof(buf), "%.24s\r\n", ctime(&current_time));
+
+	Send(attr->connfd, buf, sizeof(buf), 0);
+
+	printf("send date:%s", c_time_string);
+
+	do{
+
+		len = Recv(attr->connfd,buf,sizeof(buf),0);
+		puts("recvd");
+		
+	}while(len > 0);
+
+	puts("thread return");
+
+	return NULL;
+}

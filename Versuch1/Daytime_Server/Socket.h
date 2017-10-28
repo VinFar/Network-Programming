@@ -8,20 +8,34 @@
 #ifndef SOCKET_H_
 #define SOCKET_H_
 
-#include <sys/types.h>
-#include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <sys/time.h>
-#include <sys/select.h>
-#include <unistd.h>
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <termios.h>
 #include <unistd.h>
 #include <assert.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/select.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <unistd.h>
+#include <string.h>
+#include <stdio.h>
+#include <time.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <pthread.h>
+
+#define BUFFER_SIZE (1 << 16)
+
+#define UNUSED(x) (void *)(x)
+
+typedef struct{
+    
+        int connfd;
+        fd_set *fdset_recv;
+    
+    }thr_struct;
 
 ssize_t Recvfrom(int sockfd,void *buf,size_t len,int flags, struct sockaddr *src_addr,socklen_t *addrlen);
 ssize_t Sendto(int sockfd,const void *buf,size_t len, int flags,const struct sockaddr *dest_addr, socklen_t addrlen);
@@ -37,5 +51,9 @@ ssize_t Write(int fd,const void* buf,size_t nbytes);
 int Listen(int sockfd,int backlog);
 int getch(void);
 int Select(int fd, fd_set *readset, fd_set *writeset, fd_set *exceptset, struct timeval *timeout);
+void *Senddate(thr_struct *attr);
+
+
+
 
 #endif /* SOCKET_H_ */

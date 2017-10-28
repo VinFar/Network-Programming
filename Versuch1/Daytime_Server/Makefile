@@ -193,7 +193,7 @@ AUTOMAKE = ${SHELL} "/home/vincent/Dokumente/FH Steinfurt/Semester 5/Netzwerkpro
 AWK = mawk
 CC = gcc
 CCDEPMODE = depmode=gcc3
-CFLAGS = -g -O2 -Wall -std=c99 -pedantic
+CFLAGS = -g -O2 -Wall -std=c99 -pedantic -pthread
 CPP = gcc -E
 CPPFLAGS = 
 CYGPATH_W = echo

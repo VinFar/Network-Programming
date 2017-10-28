@@ -25,35 +25,25 @@
  * SUCH DAMAGE.
  */
 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <unistd.h>
-#include <string.h>
-#include <stdio.h>
-#include <time.h>
-#include <stdlib.h>
-#include <stdlib.h>
-#include <fcntl.h>
-
 #include "Socket.h"
-
-#define BUFFER_SIZE (1 << 16)
 
 int main(void)
 {
-	int fd, sel_res, tr = 1;
+	int fd, tr = 1;
 
 	fd_set fdset_recv;
 	struct sockaddr_in server_addr, client_addr;
 	socklen_t addr_len;
 	ssize_t len;
+	UNUSED(len);
 	int connfd;
 	char buf[9216];
 	struct timeval time_val;
 	time_t current_time;
 	char *c_time_string;
-
+	pthread_t thr;
+	thr_struct thr_ptr;
+	thr_struct *ptr=&thr_ptr;
 	fd = Socket(AF_INET, SOCK_STREAM, 0);
 
 	memset((void *)&server_addr, 0, sizeof(server_addr)); //Flush server address struct
@@ -94,26 +84,37 @@ int main(void)
 		perror("FD_ISSET recv error");
 		_exit(-1);
 	}
-	
 
 	while (Select(connfd + 1, NULL, &fdset_recv, NULL, &time_val))
 	{
-		
 
+		puts("select");
 		if (!strncmp(buf, (char *)"exit\n", sizeof("exit\n")))
 		{
 			puts("closing connection...");
 			shutdown(connfd, SHUT_RDWR);
 			return 0;
 		}
-		current_time = time(NULL);
 
-		c_time_string = ctime(&current_time);
+		thr_ptr.connfd = connfd;
+		thr_ptr.fdset_recv = &fdset_recv;
 
-		snprintf(buf,sizeof(buf),"%.24s\r\n",ctime(&current_time));
+		if(pthread_create(&thr, NULL, Senddate, ptr)<0){
 
-		Send(connfd, buf, sizeof(buf), 0);
-		printf("send date:%s", c_time_string);
+			perror("thread error");
+			_exit(-1);
+
+		}
+
+		if (FD_ISSET(connfd, &fdset_recv))
+		{
+			puts("recv");
+		}
+
+		if (FD_ISSET(connfd, &fdset_recv))
+		{
+			puts("recv");
+		}
 
 		Listen(fd, 3); //Accept incoming connections
 
@@ -126,42 +127,4 @@ int main(void)
 	puts("Closing connection...");
 
 	return 0;
-
-	puts("1");
-
-	while ((sel_res = Select(connfd + 1, &fdset_recv, NULL, NULL, &time_val)))
-	{
-		if (sel_res == -1)
-		{
-			perror("select error");
-			_exit(-1);
-		}
-
-		if (FD_ISSET(connfd, &fdset_recv) != 0)
-		{
-			len = Recv(connfd, buf, sizeof(buf), 0);
-
-			if (len <= 0)
-			{
-				puts("Closing connection...");
-				shutdown(fd, SHUT_RDWR);
-				return 0;
-			}
-
-			Write(STDOUT_FILENO, buf, len);
-
-			FD_SET(connfd, &fdset_recv);
-			if (!FD_ISSET(connfd, &fdset_recv))
-			{
-				perror("FD_ISSET error");
-				_exit(-1);
-			}
-		}
-	}
-
-	puts("timeout after 10s!\n");
-
-	Close(fd);
-
-	return (0);
 }

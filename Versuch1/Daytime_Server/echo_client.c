@@ -75,10 +75,11 @@ int main(int argc, char **argv)
 
 	if (Select(fd+1, &fdset, NULL, NULL, &time_val))
 	{
-
+		
 		len = Recv(fd, buf, sizeof(buf), 0);
 
 		Write(STDOUT_FILENO, buf, len);
+
 
 		while ((fgets(buf, BUFFER_SIZE, stdin))) /* Read 1 byte from STDIN*/
 		{
