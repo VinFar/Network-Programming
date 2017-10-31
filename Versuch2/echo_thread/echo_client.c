@@ -69,7 +69,9 @@ int main(int argc, char **argv)
 		}
 
 		Send(fd, (const void *)buf, BUFFER_SIZE, 0);
-
+		len = Recv(fd,buf,sizeof(buf),0);
+		Write(STDOUT_FILENO,buf,len);
+		memset(buf,0,len);
 	}
 
 	shutdown(fd,SHUT_RDWR);

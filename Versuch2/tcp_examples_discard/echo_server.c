@@ -108,7 +108,6 @@ int main(void)
 					if (maxfd < client_fd[i])
 					{
 						maxfd = client_fd[i]; //set maxfd to highest accepted fd
-						
 					}
 					break;
 				}
@@ -134,6 +133,8 @@ int main(void)
 			}
 		}
 	}
+
+	shutdown(fd);
 
 	return 0;
 }

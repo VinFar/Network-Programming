@@ -199,7 +199,7 @@ int Select(int fd, fd_set *readset, fd_set *writeset, fd_set *exceptset, struct 
 	int sel;
 
 	sel = select(fd, readset, writeset, exceptset, timeout);
-	
+
 	if (sel < 0)
 	{
 
@@ -208,4 +208,34 @@ int Select(int fd, fd_set *readset, fd_set *writeset, fd_set *exceptset, struct 
 	}
 
 	return sel;
+}
+
+void *thr_echo(int *index)
+{
+
+	/*
+	Thread function for echoing the messages
+	each thread has an index for a thr_attr_struct in which the fd is stored
+	if the thread returns it sets this fd to -1, so that this is signed as free
+	
+	*/
+
+	char buf[BUFFER_SIZE];
+	ssize_t len[CLIENT_CNT];
+	printf("thread created: %d\n", *index);
+	while (1)
+	{	
+
+		len[*index] = Recv(thr_attr_struct[*index].connfd, buf, sizeof(buf), 0);
+		Write(STDOUT_FILENO, buf, len[*index]);
+		Send(thr_attr_struct[*index].connfd,buf,len[*index],0);
+		memset(buf,0,len[*index]);
+		if (len[*index] == 0)	//If nothing was received terminate the connection
+		{
+			close(thr_attr_struct[*index].connfd);
+			printf("thread %d return\n", *index);
+			thr_attr_struct[*index].connfd = -1;
+			return NULL;
+		}
+	}
 }
