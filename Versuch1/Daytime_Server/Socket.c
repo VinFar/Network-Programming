@@ -113,6 +113,8 @@ ssize_t Recv(int sockfd, void *buf, size_t len, int flags)
 		_exit(-1);
 	}
 
+	puts("recv return");
+	
 	return recv_byte;
 }
 
@@ -212,9 +214,8 @@ int Select(int fd, fd_set *readset, fd_set *writeset, fd_set *exceptset, struct 
 
 void *Senddate(thr_struct *attr){
 
-	puts("thread 1");
+	puts("Thread created");
 	
-
 	time_t current_time;
 	char *c_time_string;
 	char buf[BUFFER_SIZE];
@@ -234,10 +235,16 @@ void *Senddate(thr_struct *attr){
 
 	printf("send date:%s", c_time_string);
 
+	memset(buf,0,sizeof(buf));
+
+	while(Select((attr->connfd) + 1,NULL,attr->fdset_recv,NULL,(attr->time)))
+
 	do{
 
+		puts("vor rcv");
 		len = Recv(attr->connfd,buf,sizeof(buf),0);
 		puts("recvd");
+		printf("%s",buf);
 		
 	}while(len > 0);
 

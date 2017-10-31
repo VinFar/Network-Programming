@@ -80,7 +80,6 @@ int main(int argc, char **argv)
 
 		Write(STDOUT_FILENO, buf, len);
 
-
 		while ((fgets(buf, BUFFER_SIZE, stdin))) /* Read 1 byte from STDIN*/
 		{
 			if (!strncmp(buf, (char *)"exit\n", sizeof("exit\n")))

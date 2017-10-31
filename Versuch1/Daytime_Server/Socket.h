@@ -34,6 +34,7 @@ typedef struct{
     
         int connfd;
         fd_set *fdset_recv;
+        struct timeval* time;
     
     }thr_struct;
 

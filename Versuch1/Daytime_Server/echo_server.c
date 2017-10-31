@@ -43,7 +43,7 @@ int main(void)
 	char *c_time_string;
 	pthread_t thr;
 	thr_struct thr_ptr;
-	thr_struct *ptr=&thr_ptr;
+	thr_struct *ptr = &thr_ptr;
 	fd = Socket(AF_INET, SOCK_STREAM, 0);
 
 	memset((void *)&server_addr, 0, sizeof(server_addr)); //Flush server address struct
@@ -58,7 +58,7 @@ int main(void)
 	client_addr.sin_addr.s_addr = htonl(INADDR_ANY);
 	client_addr.sin_port = htons(2007);
 
-	if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &tr, sizeof(int)) == -1)
+	if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR | SO_KEEPALIVE, &tr, sizeof(int)) == -1)
 	{
 		perror("setsockopt");
 		_exit(1);
@@ -87,8 +87,7 @@ int main(void)
 
 	while (Select(connfd + 1, NULL, &fdset_recv, NULL, &time_val))
 	{
-
-		puts("select");
+		thr = 0;
 		if (!strncmp(buf, (char *)"exit\n", sizeof("exit\n")))
 		{
 			puts("closing connection...");
@@ -96,32 +95,39 @@ int main(void)
 			return 0;
 		}
 
-		thr_ptr.connfd = connfd;
-		thr_ptr.fdset_recv = &fdset_recv;
-
-		if(pthread_create(&thr, NULL, Senddate, ptr)<0){
-
-			perror("thread error");
-			_exit(-1);
-
-		}
-
 		if (FD_ISSET(connfd, &fdset_recv))
 		{
-			puts("recv");
+
+			thr_ptr.connfd = connfd;
+			thr_ptr.fdset_recv = &fdset_recv;
+			thr_ptr.time = &time_val;
+
+			puts("Creating Thread");
+
+			if (pthread_create(&thr, NULL, Senddate, ptr) < 0)
+			{
+
+				perror("thread error");
+				_exit(-1);
+			}
 		}
 
-		if (FD_ISSET(connfd, &fdset_recv))
-		{
-			puts("recv");
-		}
+		puts("vor listen");
 
 		Listen(fd, 3); //Accept incoming connections
-
+		puts("nach listen");
 		memset(buf, 0, sizeof(buf));
 
 		connfd = Accept(fd, (struct sockaddr *)&client_addr, addr_len); //wait for client connection to arrive. fill in client_addr struct. fd is the listening socket.
-																		//connfd is the connected socket
+		//connfd is the connected socket
+
+		FD_ZERO(&fdset_recv); /*zero fd_set*/
+		FD_SET(connfd, &fdset_recv);
+		if (!FD_ISSET(connfd, &fdset_recv))
+		{
+			perror("FD_ISSET recv error");
+			_exit(-1);
+		}
 	}
 
 	puts("Closing connection...");
