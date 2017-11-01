@@ -28,6 +28,43 @@
 	
 #include "Socket.h"
 
+static void *thr_chargen(int *index)
+{
+
+	char buf[BUFFER_SIZE];
+	fd_set recv;
+
+	printf("thread created: %d\n", *index);
+
+	FD_ZERO(&recv);
+	FD_SET(thr_attr_struct[*index].connfd, &recv);
+
+	memset(buf, 0, sizeof(buf));
+
+	char i = 0x21;
+
+	while (i)
+	{
+		buf[i - 0x21] = i;
+		if (i == 0x7e){
+		puts("break");
+			break;
+		}
+		i++;
+	}
+	buf[i+1] = '\n';
+
+	Send(thr_attr_struct[*index].connfd, buf, sizeof(buf), 0);
+	Write(STDIN_FILENO, buf, sizeof(buf));
+	close(thr_attr_struct[*index].connfd);
+
+	printf("thread %d return\n", *index);
+
+	thr_attr_struct[*index].connfd = -1;
+
+	return NULL;
+}
+
 int main(void)
 {
 	int fd, tr = 1;

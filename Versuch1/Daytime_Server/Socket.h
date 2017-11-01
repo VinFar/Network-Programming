@@ -30,13 +30,15 @@
 
 #define UNUSED(x) (void *)(x)
 
+#define CLIENT_CNT 10
+
 typedef struct{
     
         int connfd;
-        fd_set *fdset_recv;
-        struct timeval* time;
     
     }thr_struct;
+
+thr_struct thr_fd[CLIENT_CNT];  
 
 ssize_t Recvfrom(int sockfd,void *buf,size_t len,int flags, struct sockaddr *src_addr,socklen_t *addrlen);
 ssize_t Sendto(int sockfd,const void *buf,size_t len, int flags,const struct sockaddr *dest_addr, socklen_t addrlen);
@@ -52,8 +54,8 @@ ssize_t Write(int fd,const void* buf,size_t nbytes);
 int Listen(int sockfd,int backlog);
 int getch(void);
 int Select(int fd, fd_set *readset, fd_set *writeset, fd_set *exceptset, struct timeval *timeout);
-void *Senddate(thr_struct *attr);
-
+void *Senddate(int *index);
+int Shutdown(int fd,int how);
 
 
 

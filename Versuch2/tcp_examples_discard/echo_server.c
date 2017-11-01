@@ -98,9 +98,9 @@ int main(void)
 			for (int i = 0; i < CLIENT_CNT; i++)
 			{
 				if (client_fd[i] == -1)
-				{ 
-					memset((void *) &client_addr, 0, sizeof(client_addr));
-					addr_len = (socklen_t) sizeof(client_addr);
+				{
+					memset((void *)&client_addr, 0, sizeof(client_addr));
+					addr_len = (socklen_t)sizeof(client_addr);
 
 					client_fd[i] = Accept(fd, (struct sockaddr *)&client_addr, addr_len); //accept all connections, that are
 					printf("accepted connection\nfd is: %d\n", i);
@@ -122,6 +122,7 @@ int main(void)
 					len = Recv(client_fd[i], buf, sizeof(buf), 0);
 					// printf("recvd: %s\n", buf);
 					Write(STDOUT_FILENO, buf, len);
+					memset(buf, 0, len);
 					if (len == 0)
 					{
 						printf("fd %d closed\n", i);
@@ -134,7 +135,7 @@ int main(void)
 		}
 	}
 
-	shutdown(fd);
+	shutdown(fd, SHUT_RDWR);
 
 	return 0;
 }

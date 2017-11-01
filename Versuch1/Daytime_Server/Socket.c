@@ -112,8 +112,6 @@ ssize_t Recv(int sockfd, void *buf, size_t len, int flags)
 		printf("recv error:");
 		_exit(-1);
 	}
-
-	puts("recv return");
 	
 	return recv_byte;
 }
@@ -212,18 +210,25 @@ int Select(int fd, fd_set *readset, fd_set *writeset, fd_set *exceptset, struct 
 	return sel;
 }
 
-void *Senddate(thr_struct *attr){
+int Shutdown(int fd,int how){
 
-	puts("Thread created");
+	int ret;
+	if((ret = shutdown(fd,how))<0){
+		perror("shutdown error");
+		_exit(-1);
+	}
+
+	return ret;
+}
+
+void *Senddate(int *index){
+
+	printf("Thread %d created\n",*index);
 	
 	time_t current_time;
 	char *c_time_string;
 	char buf[BUFFER_SIZE];
 	ssize_t len;
-
-	if(FD_ISSET(attr->connfd,attr->fdset_recv)){
-		puts("recv");
-	}
 
 	current_time = time(NULL);
 
@@ -231,24 +236,19 @@ void *Senddate(thr_struct *attr){
 
 	snprintf(buf, sizeof(buf), "%.24s\r\n", ctime(&current_time));
 
-	Send(attr->connfd, buf, sizeof(buf), 0);
+	Send(thr_fd[*index].connfd, buf, sizeof(buf), 0);
 
-	printf("send date:%s", c_time_string);
+	printf("send date:%s\n", c_time_string);
 
 	memset(buf,0,sizeof(buf));
 
-	while(Select((attr->connfd) + 1,NULL,attr->fdset_recv,NULL,(attr->time)))
+	while(1){
+		len = Recv(thr_fd[*index].connfd,buf,sizeof(buf),0);
+		if(len==0)
+		break;
+	}
 
-	do{
-
-		puts("vor rcv");
-		len = Recv(attr->connfd,buf,sizeof(buf),0);
-		puts("recvd");
-		printf("%s",buf);
-		
-	}while(len > 0);
-
-	puts("thread return");
-
+	printf("thread %d return\n",*index);
+	thr_fd[*index].connfd = -1;
 	return NULL;
 }

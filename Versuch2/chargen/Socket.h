@@ -35,10 +35,9 @@
 
 #define BUFFER_SIZE (1 << 16)
 
-#define UNUSED(x) (void *)(x)
+#define UNUSED(x) (void)(x)
 #define CLIENT_CNT 10
-
-int fd_index;
+#define LINE_LENGTH 1000
 
 typedef struct{
     
@@ -62,8 +61,7 @@ ssize_t Write(int fd,const void* buf,size_t nbytes);
 int Listen(int sockfd,int backlog);
 int getch(void);
 int Select(int fd, fd_set *readset, fd_set *writeset, fd_set *exceptset, struct timeval *timeout);
-void *thr_echo(int *index);
-void *thr_chargen(int *index);
+
 
 
 

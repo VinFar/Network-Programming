@@ -36,7 +36,6 @@ int main(int argc, char **argv)
 	socklen_t addr_len;
 	ssize_t len;
 	char buf[BUFFER_SIZE];
-	char chr;
 
 	if (argc < 3)
 	{
@@ -50,7 +49,7 @@ int main(int argc, char **argv)
 
 	server_addr.sin_family = AF_INET;
 #ifdef HAVE_SIN_LEN
-/*server_addr.sin_len = sizeof(struct sockaddr_in);*/
+server_addr.sin_len = sizeof(struct sockaddr_in);
 #endif
 	server_addr.sin_port = htons(atoi(argv[2]));
 	server_addr.sin_addr.s_addr = Inet_addr(argv[1]);

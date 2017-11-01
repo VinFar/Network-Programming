@@ -212,7 +212,6 @@ int Select(int fd, fd_set *readset, fd_set *writeset, fd_set *exceptset, struct 
 }
 
 
-
 void *Senddate(thr_struct *attr){
 	fd_index++;
 	puts("Thread created");
