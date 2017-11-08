@@ -1,3 +1,9 @@
-bin_PROGRAMS = echo_client echo_server
+bin_PROGRAMS = echo_client echo_server daytime_server daytime_client discard_server discard_client echo_thread_server echo_thread_client
 echo_client_SOURCES = echo_client.c Socket.h Socket.c
 echo_server_SOURCES = echo_server.c Socket.h Socket.c
+daytime_server_SOURCES = daytime_server.c Socket.h Socket.c
+daytime_client_SOURCES = daytime_client.c Socket.h Socket.c
+discard_server_SOURCES = discard_server.c Socket.h Socket.c
+discard_client_SOURCES = discard_client.c Socket.h Socket.c
+echo_thread_server_SOURCES = echo_thread_server.c Socket.h Socket.c
+echo_thread_client_SOURCES = echo_thread_client.c Socket.h Socket.c

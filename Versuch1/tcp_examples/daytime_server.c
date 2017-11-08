@@ -1,3 +1,4 @@
+
 /*-
  * Copyright (c) 2013 Michael Tuexen
  * All rights reserved.
@@ -26,61 +27,43 @@
 
 #include "Socket.h"
 
-#define BUFFER_SIZE (1 << 16)
-#define MESSAGE_SIZE (9216)
 
-int main(int argc, char **argv)
+int main(void)
 {
-	int fd;
-	struct sockaddr_in server_addr;
-	socklen_t addr_len;
+	int fd, connfd;
+	struct sockaddr_in server_addr, client_addr;
+	socklen_t client_addr_len;
+	ssize_t len;
+	time_t sendtime;
 	char buf[BUFFER_SIZE];
-	ssize_t len = 0;
-	fd_set fdset_recv,fdset_err;
 
-	if (argc < 3)
-	{
-		puts("too few arguments!");
-		_exit(-1);
-	}
-
-	fd = Socket(AF_INET, SOCK_STREAM, 0); //create socket
-
-	memset(&server_addr, 0, sizeof(server_addr)); //flush sockaddr_in struct
-
+	fd = Socket(AF_INET, SOCK_STREAM, 0);
+	memset((void *)& server_addr, 0, sizeof(server_addr));
 	server_addr.sin_family = AF_INET;
-#ifdef HAVE_SIN_LEN
-/*server_addr.sin_len = sizeof(struct sockaddr_in);*/
-#endif
-	server_addr.sin_port = htons(atoi(argv[2]));
-	server_addr.sin_addr.s_addr = Inet_addr(argv[1]);
 
-	addr_len = (socklen_t)sizeof(server_addr);
-
-	Connect(fd, (const struct sockaddr *)&server_addr, addr_len);
-
-	memset(buf, 0, sizeof(buf));
-
-	FD_ZERO(&fdset_recv);
-	FD_SET(STDIN_FILENO, &fdset_recv);
+	// server_addr.sin_len = sizeof(struct sockaddr_in);
 	
-	FD_ZERO(&fdset_recv);
-	FD_SET(STDIN_FILENO,&fdset_err);
+	server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+	server_addr.sin_port = htons(2007);
+	Bind(fd, (const struct sockaddr *) & server_addr, sizeof(server_addr));
+	Listen(fd, 1);
+	while (1) {
+		client_addr_len = (socklen_t) sizeof(client_addr);
+		connfd = Accept(fd, (struct sockaddr *) & client_addr, &client_addr_len);
 
-	while (select(STDIN_FILENO + 1, &fdset_recv, NULL, NULL, NULL)) /* Read 1 byte from STDIN*/
-	{
+		sendtime = time(NULL);
+		snprintf(buf, sizeof(buf), "%.24s\r\n", ctime(&sendtime));
+		Send(connfd, (void *)buf, strlen(buf), 0);
 
-		if(FD_ISSET(STDIN_FILENO,&fdset_err)){
-			puts("errr");
-		}
-		len = read(STDIN_FILENO, buf, sizeof(buf));
-		Send(fd, (const void *)buf, len, 0);
-		FD_ZERO(&fdset_recv);
-		FD_SET(STDIN_FILENO, &fdset_recv);
-		FD_ZERO(&fdset_recv);
-		FD_SET(STDIN_FILENO,&fdset_err);
+		shutdown(fd, SHUT_WR);
+		do {
+			len = Recv(connfd, (void *)buf, sizeof(buf), 0);
+
+		} while (len > 0);
+
+		Close(connfd);
+		
 	}
-	puts("closing connection....");
-	shutdown(fd, SHUT_RDWR);
-	return 0;
+	Close(fd);
+	return (0);
 }

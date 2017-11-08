@@ -34,9 +34,9 @@ int main(int argc, char **argv)
 	int fd;
 	struct sockaddr_in server_addr;
 	socklen_t addr_len;
+	ssize_t len;
 	char buf[BUFFER_SIZE];
-	ssize_t len = 0;
-	fd_set fdset_recv,fdset_err;
+	char chr;
 
 	if (argc < 3)
 	{
@@ -61,26 +61,19 @@ int main(int argc, char **argv)
 
 	memset(buf, 0, sizeof(buf));
 
-	FD_ZERO(&fdset_recv);
-	FD_SET(STDIN_FILENO, &fdset_recv);
-	
-	FD_ZERO(&fdset_recv);
-	FD_SET(STDIN_FILENO,&fdset_err);
-
-	while (select(STDIN_FILENO + 1, &fdset_recv, NULL, NULL, NULL)) /* Read 1 byte from STDIN*/
+	while ((fgets(buf,BUFFER_SIZE,stdin)))	/* Read 1 byte from STDIN*/
 	{
-
-		if(FD_ISSET(STDIN_FILENO,&fdset_err)){
-			puts("errr");
+		if(!strncmp(buf,(char*)"exit\n",sizeof("exit\n"))){
+			puts("closing connection...");
+			break;
 		}
-		len = read(STDIN_FILENO, buf, sizeof(buf));
-		Send(fd, (const void *)buf, len, 0);
-		FD_ZERO(&fdset_recv);
-		FD_SET(STDIN_FILENO, &fdset_recv);
-		FD_ZERO(&fdset_recv);
-		FD_SET(STDIN_FILENO,&fdset_err);
+
+		Send(fd, (const void *)buf, BUFFER_SIZE, 0);
+		len = Recv(fd,buf,sizeof(buf),0);
+		Write(STDOUT_FILENO,buf,len);
+		memset(buf,0,len);
 	}
-	puts("closing connection....");
-	shutdown(fd, SHUT_RDWR);
+
+	shutdown(fd,SHUT_RDWR);
 	return 0;
 }

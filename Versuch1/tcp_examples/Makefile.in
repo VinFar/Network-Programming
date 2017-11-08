@@ -88,7 +88,10 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS = echo_client$(EXEEXT) echo_server$(EXEEXT)
+bin_PROGRAMS = echo_client$(EXEEXT) echo_server$(EXEEXT) \
+	daytime_server$(EXEEXT) daytime_client$(EXEEXT) \
+	discard_server$(EXEEXT) discard_client$(EXEEXT) \
+	echo_thread_server$(EXEEXT) echo_thread_client$(EXEEXT)
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
@@ -103,12 +106,32 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
+am_daytime_client_OBJECTS = daytime_client.$(OBJEXT) Socket.$(OBJEXT)
+daytime_client_OBJECTS = $(am_daytime_client_OBJECTS)
+daytime_client_LDADD = $(LDADD)
+am_daytime_server_OBJECTS = daytime_server.$(OBJEXT) Socket.$(OBJEXT)
+daytime_server_OBJECTS = $(am_daytime_server_OBJECTS)
+daytime_server_LDADD = $(LDADD)
+am_discard_client_OBJECTS = discard_client.$(OBJEXT) Socket.$(OBJEXT)
+discard_client_OBJECTS = $(am_discard_client_OBJECTS)
+discard_client_LDADD = $(LDADD)
+am_discard_server_OBJECTS = discard_server.$(OBJEXT) Socket.$(OBJEXT)
+discard_server_OBJECTS = $(am_discard_server_OBJECTS)
+discard_server_LDADD = $(LDADD)
 am_echo_client_OBJECTS = echo_client.$(OBJEXT) Socket.$(OBJEXT)
 echo_client_OBJECTS = $(am_echo_client_OBJECTS)
 echo_client_LDADD = $(LDADD)
 am_echo_server_OBJECTS = echo_server.$(OBJEXT) Socket.$(OBJEXT)
 echo_server_OBJECTS = $(am_echo_server_OBJECTS)
 echo_server_LDADD = $(LDADD)
+am_echo_thread_client_OBJECTS = echo_thread_client.$(OBJEXT) \
+	Socket.$(OBJEXT)
+echo_thread_client_OBJECTS = $(am_echo_thread_client_OBJECTS)
+echo_thread_client_LDADD = $(LDADD)
+am_echo_thread_server_OBJECTS = echo_thread_server.$(OBJEXT) \
+	Socket.$(OBJEXT)
+echo_thread_server_OBJECTS = $(am_echo_thread_server_OBJECTS)
+echo_thread_server_LDADD = $(LDADD)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -137,8 +160,14 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(echo_client_SOURCES) $(echo_server_SOURCES)
-DIST_SOURCES = $(echo_client_SOURCES) $(echo_server_SOURCES)
+SOURCES = $(daytime_client_SOURCES) $(daytime_server_SOURCES) \
+	$(discard_client_SOURCES) $(discard_server_SOURCES) \
+	$(echo_client_SOURCES) $(echo_server_SOURCES) \
+	$(echo_thread_client_SOURCES) $(echo_thread_server_SOURCES)
+DIST_SOURCES = $(daytime_client_SOURCES) $(daytime_server_SOURCES) \
+	$(discard_client_SOURCES) $(discard_server_SOURCES) \
+	$(echo_client_SOURCES) $(echo_server_SOURCES) \
+	$(echo_thread_client_SOURCES) $(echo_thread_server_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -282,6 +311,12 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 echo_client_SOURCES = echo_client.c Socket.h Socket.c
 echo_server_SOURCES = echo_server.c Socket.h Socket.c
+daytime_server_SOURCES = daytime_server.c Socket.h Socket.c
+daytime_client_SOURCES = daytime_client.c Socket.h Socket.c
+discard_server_SOURCES = discard_server.c Socket.h Socket.c
+discard_client_SOURCES = discard_client.c Socket.h Socket.c
+echo_thread_server_SOURCES = echo_thread_server.c Socket.h Socket.c
+echo_thread_client_SOURCES = echo_thread_client.c Socket.h Socket.c
 all: all-am
 
 .SUFFIXES:
@@ -362,6 +397,22 @@ uninstall-binPROGRAMS:
 clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
 
+daytime_client$(EXEEXT): $(daytime_client_OBJECTS) $(daytime_client_DEPENDENCIES) $(EXTRA_daytime_client_DEPENDENCIES) 
+	@rm -f daytime_client$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(daytime_client_OBJECTS) $(daytime_client_LDADD) $(LIBS)
+
+daytime_server$(EXEEXT): $(daytime_server_OBJECTS) $(daytime_server_DEPENDENCIES) $(EXTRA_daytime_server_DEPENDENCIES) 
+	@rm -f daytime_server$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(daytime_server_OBJECTS) $(daytime_server_LDADD) $(LIBS)
+
+discard_client$(EXEEXT): $(discard_client_OBJECTS) $(discard_client_DEPENDENCIES) $(EXTRA_discard_client_DEPENDENCIES) 
+	@rm -f discard_client$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(discard_client_OBJECTS) $(discard_client_LDADD) $(LIBS)
+
+discard_server$(EXEEXT): $(discard_server_OBJECTS) $(discard_server_DEPENDENCIES) $(EXTRA_discard_server_DEPENDENCIES) 
+	@rm -f discard_server$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(discard_server_OBJECTS) $(discard_server_LDADD) $(LIBS)
+
 echo_client$(EXEEXT): $(echo_client_OBJECTS) $(echo_client_DEPENDENCIES) $(EXTRA_echo_client_DEPENDENCIES) 
 	@rm -f echo_client$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(echo_client_OBJECTS) $(echo_client_LDADD) $(LIBS)
@@ -370,6 +421,14 @@ echo_server$(EXEEXT): $(echo_server_OBJECTS) $(echo_server_DEPENDENCIES) $(EXTRA
 	@rm -f echo_server$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(echo_server_OBJECTS) $(echo_server_LDADD) $(LIBS)
 
+echo_thread_client$(EXEEXT): $(echo_thread_client_OBJECTS) $(echo_thread_client_DEPENDENCIES) $(EXTRA_echo_thread_client_DEPENDENCIES) 
+	@rm -f echo_thread_client$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(echo_thread_client_OBJECTS) $(echo_thread_client_LDADD) $(LIBS)
+
+echo_thread_server$(EXEEXT): $(echo_thread_server_OBJECTS) $(echo_thread_server_DEPENDENCIES) $(EXTRA_echo_thread_server_DEPENDENCIES) 
+	@rm -f echo_thread_server$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(echo_thread_server_OBJECTS) $(echo_thread_server_LDADD) $(LIBS)
+
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 
@@ -377,8 +436,14 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Socket.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/daytime_client.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/daytime_server.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/discard_client.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/discard_server.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/echo_client.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/echo_server.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/echo_thread_client.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/echo_thread_server.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

@@ -45,7 +45,11 @@ echo_client.o: echo_client.c /usr/include/stdc-predef.h Socket.h \
  /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
  /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
  /usr/include/x86_64-linux-gnu/bits/stdlib.h /usr/include/termios.h \
- /usr/include/x86_64-linux-gnu/bits/termios.h /usr/include/assert.h
+ /usr/include/x86_64-linux-gnu/bits/termios.h /usr/include/assert.h \
+ /usr/include/pthread.h /usr/include/sched.h \
+ /usr/include/x86_64-linux-gnu/bits/sched.h \
+ /usr/include/x86_64-linux-gnu/bits/pthreadtypes.h \
+ /usr/include/x86_64-linux-gnu/bits/setjmp.h
 
 /usr/include/stdc-predef.h:
 
@@ -172,3 +176,13 @@ Socket.h:
 /usr/include/x86_64-linux-gnu/bits/termios.h:
 
 /usr/include/assert.h:
+
+/usr/include/pthread.h:
+
+/usr/include/sched.h:
+
+/usr/include/x86_64-linux-gnu/bits/sched.h:
+
+/usr/include/x86_64-linux-gnu/bits/pthreadtypes.h:
+
+/usr/include/x86_64-linux-gnu/bits/setjmp.h:

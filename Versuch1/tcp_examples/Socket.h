@@ -22,6 +22,24 @@
 #include <unistd.h>
 #include <assert.h>
 #include <string.h>
+#include <pthread.h>
+
+#define CLIENT_CNT 10
+#define BUFFER_SIZE (1 << 16)
+#define MESSAGE_SIZE (9216)
+#define UNUSED(x) (void)(x)
+
+typedef struct{
+    
+        int connfd;
+    
+    }thr_struct;
+
+thr_struct thr_fd[CLIENT_CNT];  
+
+int fd_index;
+
+
 
 ssize_t Recvfrom(int sockfd,void *buf,size_t len,int flags, struct sockaddr *src_addr,socklen_t *addrlen);
 ssize_t Sendto(int sockfd,const void *buf,size_t len, int flags,const struct sockaddr *dest_addr, socklen_t addrlen);

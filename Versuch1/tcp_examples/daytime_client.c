@@ -26,17 +26,51 @@
 
 #include "Socket.h"
 
-#define BUFFER_SIZE (1 << 16)
-#define MESSAGE_SIZE (9216)
+
+
+
+void *Senddate(int *index){
+	
+		printf("Thread %d created\n",*index);
+		
+		time_t current_time;
+		char *c_time_string;
+		char buf[BUFFER_SIZE];
+		ssize_t len;
+	
+		current_time = time(NULL);
+	
+		c_time_string = ctime(&current_time);
+	
+		snprintf(buf, sizeof(buf), "%.24s\r\n", ctime(&current_time));
+	
+		Send(thr_fd[*index].connfd, buf, sizeof(buf), 0);
+	
+		printf("send date:%s\n", c_time_string);
+	
+		memset(buf,0,sizeof(buf));
+	
+		while(1){
+			len = Recv(thr_fd[*index].connfd,buf,sizeof(buf),0);
+			if(len==0)
+			break;
+		}
+	
+		printf("thread %d return\n",*index);
+		thr_fd[*index].connfd = -1;
+		return NULL;
+	}
+
 
 int main(int argc, char **argv)
 {
 	int fd;
+	fd_set fdset;
 	struct sockaddr_in server_addr;
 	socklen_t addr_len;
+	ssize_t len;
 	char buf[BUFFER_SIZE];
-	ssize_t len = 0;
-	fd_set fdset_recv,fdset_err;
+	struct timeval time_val;
 
 	if (argc < 3)
 	{
@@ -61,26 +95,38 @@ int main(int argc, char **argv)
 
 	memset(buf, 0, sizeof(buf));
 
-	FD_ZERO(&fdset_recv);
-	FD_SET(STDIN_FILENO, &fdset_recv);
-	
-	FD_ZERO(&fdset_recv);
-	FD_SET(STDIN_FILENO,&fdset_err);
-
-	while (select(STDIN_FILENO + 1, &fdset_recv, NULL, NULL, NULL)) /* Read 1 byte from STDIN*/
+	FD_ZERO(&fdset); /*zero fd_set*/
+	FD_SET(fd, &fdset);
+	if (!FD_ISSET(fd, &fdset))
 	{
-
-		if(FD_ISSET(STDIN_FILENO,&fdset_err)){
-			puts("errr");
-		}
-		len = read(STDIN_FILENO, buf, sizeof(buf));
-		Send(fd, (const void *)buf, len, 0);
-		FD_ZERO(&fdset_recv);
-		FD_SET(STDIN_FILENO, &fdset_recv);
-		FD_ZERO(&fdset_recv);
-		FD_SET(STDIN_FILENO,&fdset_err);
+		perror("FD_ISSET Recv error");
+		_exit(-1);
 	}
-	puts("closing connection....");
+
+	time_val.tv_sec = 2;
+	time_val.tv_usec = 1;
+
+	if (Select(fd+1, &fdset, NULL, NULL, &time_val))
+	{
+		
+		len = Recv(fd, buf, sizeof(buf), 0);
+
+		Write(STDOUT_FILENO, buf, len);
+
+		while ((fgets(buf, BUFFER_SIZE, stdin))) /* Read 1 byte from STDIN*/
+		{
+			if (!strncmp(buf, (char *)"exit\n", sizeof("exit\n")))
+			{
+
+				break;
+			}
+
+			Send(fd, (const void *)buf, BUFFER_SIZE, 0);
+		}
+	}else{
+		puts("timeout");
+	}
+	puts("closing connection...");
 	shutdown(fd, SHUT_RDWR);
 	return 0;
 }

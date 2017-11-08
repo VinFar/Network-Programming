@@ -1,3 +1,4 @@
+
 /*-
  * Copyright (c) 2013 Michael Tuexen
  * All rights reserved.
@@ -26,61 +27,61 @@
 
 #include "Socket.h"
 
-#define BUFFER_SIZE (1 << 16)
-#define MESSAGE_SIZE (9216)
-
-int main(int argc, char **argv)
+void handleTCPEcho(int connfd)
 {
-	int fd;
-	struct sockaddr_in server_addr;
-	socklen_t addr_len;
+
+	int len;
 	char buf[BUFFER_SIZE];
-	ssize_t len = 0;
-	fd_set fdset_recv,fdset_err;
-
-	if (argc < 3)
+	do
 	{
-		puts("too few arguments!");
-		_exit(-1);
-	}
+		int charsend = 0;
+		len = Recv(connfd, (void *)buf, sizeof(buf), 0);
+		do
+		{
+			charsend += Send(connfd, (void *)&buf[charsend], len - charsend, 0);
+			printf("Charsend: %d\n", charsend);
+		} while (charsend < len);
+	} while (len > 0);
+	Close(connfd);
+}
 
-	fd = Socket(AF_INET, SOCK_STREAM, 0); //create socket
+static void *ThreadMain(void *thread_arg)
+{
+	int connfd = *((int *)thread_arg);
+	printf("created thread fd: %d\n",connfd);
+	free(thread_arg);
+	handleTCPEcho(connfd);
+	return NULL;
 
-	memset(&server_addr, 0, sizeof(server_addr)); //flush sockaddr_in struct
+}
 
+int main(void)
+{
+	int fd, connfd;
+	struct sockaddr_in server_addr, client_addr;
+	pthread_t threadID;
+	socklen_t client_addr_len;
+
+	fd = Socket(AF_INET, SOCK_STREAM, 0);
+	memset((void *)&server_addr, 0, sizeof(server_addr));
 	server_addr.sin_family = AF_INET;
-#ifdef HAVE_SIN_LEN
-/*server_addr.sin_len = sizeof(struct sockaddr_in);*/
-#endif
-	server_addr.sin_port = htons(atoi(argv[2]));
-	server_addr.sin_addr.s_addr = Inet_addr(argv[1]);
 
-	addr_len = (socklen_t)sizeof(server_addr);
+	// server_addr.sin_len = sizeof(struct sockaddr_in);
 
-	Connect(fd, (const struct sockaddr *)&server_addr, addr_len);
-
-	memset(buf, 0, sizeof(buf));
-
-	FD_ZERO(&fdset_recv);
-	FD_SET(STDIN_FILENO, &fdset_recv);
-	
-	FD_ZERO(&fdset_recv);
-	FD_SET(STDIN_FILENO,&fdset_err);
-
-	while (select(STDIN_FILENO + 1, &fdset_recv, NULL, NULL, NULL)) /* Read 1 byte from STDIN*/
+	server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+	server_addr.sin_port = htons(2007);
+	Bind(fd, (const struct sockaddr *)&server_addr, sizeof(server_addr));
+	Listen(fd, 1);
+	while (1)
 	{
-
-		if(FD_ISSET(STDIN_FILENO,&fdset_err)){
-			puts("errr");
-		}
-		len = read(STDIN_FILENO, buf, sizeof(buf));
-		Send(fd, (const void *)buf, len, 0);
-		FD_ZERO(&fdset_recv);
-		FD_SET(STDIN_FILENO, &fdset_recv);
-		FD_ZERO(&fdset_recv);
-		FD_SET(STDIN_FILENO,&fdset_err);
+		memset((void *)&client_addr, 0, sizeof(client_addr));
+		client_addr_len = (socklen_t)sizeof(client_addr);
+		connfd = Accept(fd, (struct sockaddr *)&client_addr, &client_addr_len);
+		int *thread_arg = (int *)malloc(sizeof(int));
+		*thread_arg = connfd;
+		printf("creating thread fd%d\n",connfd);
+		pthread_create(&threadID, NULL, ThreadMain, (void *)thread_arg);
 	}
-	puts("closing connection....");
-	shutdown(fd, SHUT_RDWR);
-	return 0;
+	Close(fd);
+	return (0);
 }
